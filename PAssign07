@@ -1,0 +1,114 @@
+/**
+ * Link to my hello-world Github tutorial:
+ * https://github.com/GSU-CS-1302/csci1302-JavaFX/blob/main/README.md
+ *
+ * This program simulates an ATM machine interface.
+ * It uses basic JavaFX components (Buttons, TextFields, Labels, ImageView, etc.)
+ * along with the provided KeyPadPane (extended here as CustomKeyPadPane)
+ * to replicate a real-world ATM keypad.
+ *
+ * 
+ */
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import keypad.KeyPadPane;
+
+public class PAssign07 extends Application {
+
+    @Override
+    public void start(Stage primaryStage) {
+        // Main container pane
+        BorderPane mainPane = new BorderPane();
+
+        // ----- Top: Title and ATM image -----
+        Label titleLabel = new Label("ATM Machine Interface");
+        titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        
+        // Optional ATM image (update the file path as needed)
+        ImageView atmImageView = new ImageView();
+        try {
+            Image atmImage = new Image("file:atm.png");
+            atmImageView.setImage(atmImage);
+            atmImageView.setFitWidth(200);
+            atmImageView.setPreserveRatio(true);
+        } catch (Exception e) {
+            System.out.println("ATM image not found. Continuing without image.");
+        }
+        
+        VBox topBox = new VBox(10, titleLabel, atmImageView);
+        topBox.setStyle("-fx-alignment: center; -fx-padding: 10;");
+        mainPane.setTop(topBox);
+
+        // ----- Center: Display Panel for PIN entry -----
+        Label pinLabel = new Label("Enter PIN:");
+        TextField pinDisplay = new TextField();
+        pinDisplay.setEditable(false);
+        pinDisplay.setPrefWidth(200);
+        HBox centerBox = new HBox(10, pinLabel, pinDisplay);
+        centerBox.setStyle("-fx-alignment: center; -fx-padding: 10;");
+        mainPane.setCenter(centerBox);
+
+        // ----- Bottom: Custom Keypad using the provided KeyPadPane -----
+        CustomKeyPadPane customKeyPad = new CustomKeyPadPane(pinDisplay);
+        mainPane.setBottom(customKeyPad);
+
+        // Create scene and show stage
+        Scene scene = new Scene(mainPane, 400, 500);
+        primaryStage.setTitle("ATM Machine Interface");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+    
+    // main method
+    public static void main(String[] args) {
+        launch(args);
+    }
+    
+    /**
+     * CustomKeyPadPane extends the provided KeyPadPane.
+     * It overrides the button event handlers to:
+     * - Append numeric digits to the display TextField.
+     * - Clear the display when "*" is pressed.
+     * - Simulate PIN submission when "#" is pressed.
+     */
+    class CustomKeyPadPane extends KeyPadPane {
+        private TextField displayField;
+        
+        public CustomKeyPadPane(TextField displayField) {
+            super(); // initialize the default KeyPadPane
+            this.displayField = displayField;
+            // Add custom styling to the keypad pane
+            this.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-hgap: 10; -fx-vgap: 10;");
+            
+            // Override event handlers for each button in the keypad
+            for (Button btn : listButtons) {
+                btn.setOnAction(e -> {
+                    String btnText = btn.getText().trim();
+                    // If button text is a digit, append to display
+                    if (!btnText.isEmpty() && btnText.matches("\\d")) {
+                        displayField.appendText(btnText);
+                    }
+                    // If "*" is pressed, clear the display
+                    else if (btnText.equals("*")) {
+                        displayField.clear();
+                    }
+                    // If "#" is pressed, simulate PIN entry submission
+                    else if (btnText.equals("#")) {
+                        System.out.println("Submitted PIN: " + displayField.getText());
+                        displayField.clear();
+                    }
+                });
+            }
+        }
+    }
+}
